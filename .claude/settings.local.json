@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Rename-Item *)",
+      "PowerShell(New-Item *)",
+      "PowerShell(ipconfig | Select-String -Pattern \"IPv4\" | Where-Object { $_ -notmatch \"127\\\\.\" })",
+      "PowerShell(Get-WmiObject *)",
+      "PowerShell([System.IO.Ports.SerialPort]::GetPortNames\\(\\))",
+      "Bash(ipconfig)",
+      "Bash(Select-String -Pattern \"IPv4\" -A 1)",
+      "PowerShell(Get-CimInstance *)",
+      "PowerShell(Get-PnpDevice *)"
+    ]
+  }
+}
