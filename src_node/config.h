@@ -3,6 +3,7 @@
 // ─── PINOS ────────────────────────────────────────────────────
 #define PIN_TRIG   4   // movido de GPIO5 (conflito com LoRa reset)
 #define PIN_ECHO   18
+#define PIN_LED    2   // LED onboard do ESP32 DevKit
 
 // ─── LORA UART ────────────────────────────────────────────────
 #define LORA_RXD   16

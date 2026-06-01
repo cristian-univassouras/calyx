@@ -34,6 +34,8 @@ void setup() {
 
   pinMode(PIN_TRIG, OUTPUT);
   pinMode(PIN_ECHO, INPUT);
+  pinMode(PIN_LED, OUTPUT);
+  digitalWrite(PIN_LED, LOW);
 
   LoRaSerial.begin(115200, SERIAL_8N1, LORA_RXD, LORA_TXD);
 
@@ -71,7 +73,10 @@ void loop() {
     snprintf(msg, sizeof(msg), "%d:%.1f", NODE_ID, dist);
     Serial.printf("[LoRa] enviando: %s\n", msg);
     resp = lorawan.sendT(1, msg);
-    if (resp != CommandResponse::OK)
+    if (resp != CommandResponse::OK) {
       Serial.println("[LoRa] erro no envio");
+    } else {
+      digitalWrite(PIN_LED, HIGH); delay(80); digitalWrite(PIN_LED, LOW);
+    }
   }
 }

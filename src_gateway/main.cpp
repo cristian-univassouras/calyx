@@ -115,6 +115,12 @@ void event_handler(Event type) {
 
     Serial.printf("[LoRa] recebido: %s\n", msg);
 
+    // 2 piscadas rápidas = dado LoRa recebido
+    for (int i = 0; i < 2; i++) {
+      digitalWrite(PIN_LED, HIGH); delay(60);
+      digitalWrite(PIN_LED, LOW);  delay(60);
+    }
+
     int nodeId;
     float dist;
     if (parseMensagem(msg, nodeId, dist))
@@ -128,6 +134,9 @@ void event_handler(Event type) {
 void setup() {
   Serial.begin(115200);
   Serial.println("[Gateway] iniciando...");
+
+  pinMode(PIN_LED, OUTPUT);
+  digitalWrite(PIN_LED, LOW);
 
   // OLED
   Wire.begin();

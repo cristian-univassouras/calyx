@@ -5,6 +5,9 @@
 #define WIFI_PASSWORD "12345678"
 #define SERVER_IP     "10.198.110.46"
 
+// ─── PINOS ────────────────────────────────────────────────────
+#define PIN_LED    2   // LED onboard do ESP32 DevKit
+
 // ─── LORA UART ────────────────────────────────────────────────
 #define LORA_RXD   16
 #define LORA_TXD   17
