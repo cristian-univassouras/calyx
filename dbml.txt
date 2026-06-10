@@ -1,0 +1,52 @@
+// =====================================================================
+// Calyx - modelo do banco de dados (Postgres)
+// Estoque virtual de cozinha: recipientes + sensor IoT -> % cheio e peso
+// =====================================================================
+
+// Enum de formatos de recipiente
+Enum formats {
+  cilindric   // Requer dimensions: radius, height
+  square      // Requer dimensions: side, height
+  conical     // Requer dimensions: base_radius, height (base larga embaixo)
+  spherical   // Requer dimensions: radius
+  rectangular // Requer dimensions: width, length, height
+  custom      // Requer dimensions: profile = [{h, v}, ...] (curva de calibracao)
+}
+
+Table users {
+  id            integer      [pk, increment]
+  name          varchar
+  email         varchar      [unique, not null]
+  password_hash varchar      [not null, note: 'bcrypt']
+}
+
+Table categories {
+  id     integer [pk, increment]
+  name   varchar
+  method text    // Ex: "volume_to_mass"
+}
+
+Table products {
+  id               integer [pk, increment]
+  name             varchar
+  density          float   [not null, note: 'g/cm3 - converte volume em peso']
+  icon             varchar // emoji ilustrativo (ex: arroz -> rice bowl)
+  content_category integer [ref: > categories.id, null]
+}
+
+Table recipients {
+  id           integer [pk, increment]
+  user_id      integer [ref: > users.id, not null]
+  product_id   integer [ref: > products.id, null, note: 'material que esta dentro']
+  name         varchar
+  format       formats
+  dimensions   json    // medidas do formato (ver enum). Ex: {"radius":10,"height":20}
+  device_token varchar [unique, not null, note: 'token do sensor IoT (header X-Device-Token)']
+}
+
+Table measurements {
+  id                integer  [pk, increment]
+  recipient_id      integer  [ref: > recipients.id, not null]
+  distance_from_lid float    [not null, note: 'cm da tampa ate o conteudo (sensor IoT)']
+  timestamp         datetime [default: `now()`]
+}
