@@ -23,7 +23,7 @@ export default function EditRecipient() {
 
   async function handleSubmit(payload) {
     await api.updateRecipient(id, payload);
-    router.replace(`/recipients/${id}`);
+    router.replace('/');
   }
 
   if (error) {

@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Easing } from 'react-native';
 import Svg, {
   Defs, ClipPath, Path, Rect,
   Ellipse, Line, Circle, G,
 } from 'react-native-svg';
 import { useAppTheme } from '../src/theme';
+
+const GWrapper = React.forwardRef((props, ref) => {
+  const { collapsable, ...rest } = props;
+  return <G ref={ref} {...rest} />;
+});
+const AnimatedG = Animated.createAnimatedComponent(GWrapper);
 
 let _uid = 0;
 
@@ -83,7 +90,7 @@ const SHAPES = {
   },
 };
 
-export default function ShapeIcon({ format, fill = null, size = 96 }) {
+export default function ShapeIcon({ format, fill = null, size = 96, animated = true }) {
   const theme = useAppTheme();
   const shape = SHAPES[format] || SHAPES.cilindric;
   const clipId = React.useRef(`sc${++_uid}`).current;
@@ -96,6 +103,34 @@ export default function ShapeIcon({ format, fill = null, size = 96 }) {
     liquidY = shape.yBottom - p * (shape.yBottom - shape.yTop);
   }
 
+  const waveAnim1 = useRef(new Animated.Value(0)).current;
+  const waveAnim2 = useRef(new Animated.Value(0)).current;
+  const riseAnim = useRef(new Animated.Value(shape.yBottom)).current;
+
+  useEffect(() => {
+    if (fill != null && animated) {
+      Animated.loop(
+        Animated.timing(waveAnim1, { toValue: -100, duration: 2000, easing: Easing.linear, useNativeDriver: true })
+      ).start();
+      Animated.loop(
+        Animated.timing(waveAnim2, { toValue: -100, duration: 2500, easing: Easing.linear, useNativeDriver: true })
+      ).start();
+
+      Animated.timing(riseAnim, {
+        toValue: liquidY - 5,
+        duration: 1500,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    } else if (fill != null) {
+      riseAnim.setValue(liquidY - 5);
+      waveAnim1.setValue(0);
+      waveAnim2.setValue(0);
+    }
+  }, [fill, liquidY, animated, shape.yBottom]);
+
+  const wavePath = "M 0 5 Q 25 0 50 5 T 100 5 Q 125 0 150 5 T 200 5 V 150 H 0 Z";
+
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       {liquidY != null && (
@@ -106,15 +141,20 @@ export default function ShapeIcon({ format, fill = null, size = 96 }) {
         </Defs>
       )}
       {liquidY != null && (
-        <Rect
-          x="0"
-          y={liquidY}
-          width="100"
-          height={shape.yBottom - liquidY + 4}
-          fill={theme.honey}
-          fillOpacity={0.45}
-          clipPath={`url(#${clipId})`}
-        />
+        <G clipPath={`url(#${clipId})`}>
+          {animated ? (
+            <>
+              <AnimatedG style={{ transform: [{ translateX: waveAnim2 }, { translateY: riseAnim }] }}>
+                <Path d={wavePath} fill={theme.honey} fillOpacity={0.3} />
+              </AnimatedG>
+              <AnimatedG style={{ transform: [{ translateX: waveAnim1 }, { translateY: riseAnim }] }}>
+                <Path d={wavePath} fill={theme.honey} fillOpacity={0.6} transform="translate(10, 3)" />
+              </AnimatedG>
+            </>
+          ) : (
+            <Rect x="0" y={liquidY} width="100" height={shape.yBottom - liquidY + 4} fill={theme.honey} fillOpacity={0.45} />
+          )}
+        </G>
       )}
       <Outline c={theme.accent} w={sw} />
     </Svg>
