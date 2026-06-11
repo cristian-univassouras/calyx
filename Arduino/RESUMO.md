@@ -1,89 +1,59 @@
-# Monitor de Nível com ESP32
+# Calyx IoT — Resumo
 
-Mede o nível de preenchimento de recipientes com sensor ultrassônico e exibe em tempo real num dashboard web.
-
----
-
-## Componentes
-
-- ESP32 Dev Board
-- Sensor ultrassônico HC-SR04
-- Display OLED SSD1306 128×64 (I2C) — opcional
-- Resistores 1kΩ e 2kΩ (divisor de tensão no ECHO)
+Sistema de monitoramento de estoque de cozinha com ESP32 + LoRa + API Calyx + app mobile.
 
 ---
 
-## Ligações
+## Hardware
 
-| Componente | Pino | ESP32 |
+| Placa | Função | Conectividade |
 |---|---|---|
-| HC-SR04 | VCC | VIN (5V) |
+| **Nó 1** | Mede distância e envia via LoRa | LoRa P2P (sem WiFi) |
+| **Gateway** | Relaya dados do nó + monitora seu próprio pote | LoRa + WiFi → API |
+
+---
+
+## Ligações (ambas as placas)
+
+| Componente | Pino | GPIO |
+|---|---|---|
+| HC-SR04 | VCC | VIN (5 V) |
 | HC-SR04 | GND | GND |
-| HC-SR04 | TRIG | GPIO 5 |
-| HC-SR04 | ECHO | GPIO 18 ¹ |
-| OLED | VCC | 3.3V |
-| OLED | GND | GND |
+| HC-SR04 | TRIG | GPIO 27 |
+| HC-SR04 | ECHO | GPIO 32 |
+| LoRa | RXD | GPIO 16 |
+| LoRa | TXD | GPIO 17 |
+| LoRa | RESET | GPIO 5 |
+
+**Gateway adicional:**
+
+| Componente | Pino | GPIO |
+|---|---|---|
 | OLED | SDA | GPIO 21 |
 | OLED | SCL | GPIO 22 |
 
-¹ O ECHO devolve 5V. Proteja o ESP32 com divisor de tensão:
-`ECHO → 1kΩ → GPIO 18`, com `2kΩ entre GPIO 18 e GND`.
+---
+
+## API
+
+| Campo | Valor |
+|---|---|
+| Endpoint | `POST /ingest` |
+| Porta | `8080` |
+| Auth | `X-Device-Token: <token>` |
+| Body | `{ "distance_from_lid": 23.5 }` |
+
+O `device_token` de cada pote aparece na tela de detalhe do recipiente no app mobile.
 
 ---
 
-## Servidor (Python)
-
-**Requisitos:** Python 3.10+
+## Gravar firmware
 
 ```bash
-cd server
-pip install fastapi uvicorn[standard]
-uvicorn main:app --host 0.0.0.0 --port 8000
+pio run -e node1   -t upload   # grava o nó
+pio run -e gateway -t upload   # grava o gateway
 ```
 
-Abra `http://localhost:8000` no navegador.
+Preencher `src_gateway/config.h` com WiFi, IP do servidor e device_tokens antes de gravar.
 
----
-
-## Firmware (ESP32)
-
-**Requisitos:** VS Code + PlatformIO
-
-1. Edite `src/main.cpp` — ajuste o IP do servidor e as redes WiFi:
-```cpp
-const char *serverName = "http://SEU_IP:8000/post";
-
-const Network networks[] = {
-  { "NomeDaRede", "senha" },
-};
-```
-
-2. Compile e envie pelo PlatformIO (botão **Upload**).
-
-> Para descobrir o IP do computador no Windows: `ipconfig` → "Endereço IPv4" do adaptador Wi-Fi.
-
----
-
-## Como usar
-
-1. Inicie o servidor Python
-2. Ligue o ESP32 (conecta ao WiFi automaticamente)
-3. No dashboard, cadastre um recipiente informando nome, altura em cm e localização opcional
-4. O nível é atualizado em tempo real
-
-**Três abas no dashboard:**
-- **Geral** — todos os recipientes ao mesmo tempo
-- **Mapa** — localização geográfica de cada recipiente
-- **Detalhe** — lixeira animada + histórico de leituras
-
----
-
-## Para múltiplos dispositivos
-
-Cada ESP32 envia os dados para o mesmo servidor. Para associar um dispositivo a um recipiente específico, inclua o ID do recipiente no POST:
-
-```
-distancia=15.3cm&cid=ID_DO_RECIPIENTE
-```
-
-O ID aparece na URL ao selecionar o recipiente no dashboard.
+Veja [COMO_GRAVAR.md](COMO_GRAVAR.md) para detalhes.

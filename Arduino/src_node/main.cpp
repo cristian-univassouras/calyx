@@ -42,15 +42,14 @@ void setup() {
   lorawan.event_listener = &event_handler;
   lorawan.setPinReset(LORA_RESET);
   lorawan.reset();
-  delay(1000);
+  delay(2000);
 
-  lorawan.set_JoinMode(SMW_SX1276M0_JOIN_MODE_P2P);
   lorawan.set_DevAddr(LORA_DEV_ADDR);
+  lorawan.set_P2P_DevAddr(LORA_GATEWAY_ADDR);
   lorawan.set_AppSKey(LORA_APP_SKEY);
   lorawan.set_NwkSKey(LORA_NWK_SKEY);
-  lorawan.set_P2P_DevAddr(LORA_GATEWAY_ADDR);
   lorawan.set_P2P_SyncWord(LORA_SYNC_WORD);
-
+  lorawan.set_JoinMode(SMW_SX1276M0_JOIN_MODE_P2P);
   lorawan.join();
   Serial.println("[LoRa] aguardando P2P join...");
 }
@@ -71,8 +70,12 @@ void loop() {
   } else {
     char msg[16];
     snprintf(msg, sizeof(msg), "%d:%.1f", NODE_ID, dist);
+    // converte para hex (sendX = modo do exemplo RoboCore)
+    char hexMsg[sizeof(msg) * 2 + 1] = {0};
+    for (int j = 0; j < (int)strlen(msg); j++)
+      sprintf(hexMsg + j * 2, "%02X", (uint8_t)msg[j]);
     Serial.printf("[LoRa] enviando: %s\n", msg);
-    resp = lorawan.sendT(1, msg);
+    resp = lorawan.sendX(1, hexMsg);
     if (resp != CommandResponse::OK) {
       Serial.println("[LoRa] erro no envio");
     } else {

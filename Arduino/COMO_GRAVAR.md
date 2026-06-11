@@ -1,20 +1,41 @@
-# Como gravar o firmware LoRa P2P
+# Como gravar o firmware
 
-## Pré-requisito: ajuste físico de hardware
+## Pré-requisitos
 
-Nos **2 ESP32 nós sensores**, mover o fio do HC-SR04:
+- VS Code com extensão PlatformIO instalada
+- Dois ESP32 com módulo LoRa SMW_SX1276M0
+- Sensor ultrassônico conectado em ambas as placas: **TRIG → GPIO 27**, **ECHO → GPIO 32**
 
+---
+
+## Antes de gravar: configurar os tokens
+
+Cada placa monitora um pote cadastrado no app Calyx. O `device_token` aparece na tela de detalhe do pote no app.
+
+**`src_gateway/config.h`** — preencher antes de gravar o gateway:
+
+```cpp
+#define WIFI_SSID     "sua_rede"
+#define WIFI_PASSWORD "sua_senha"
+#define SERVER_IP     "IP_do_PC_onde_roda_a_API"
+
+// Token do pote monitorado pelo próprio gateway
+#define GATEWAY_DEVICE_TOKEN  "token_do_pote_do_gateway"
+
+// Token do pote monitorado pelo nó 1 (via LoRa)
+static const NodeToken NODE_TOKENS[] = {
+  { 1, "token_do_pote_do_no1" },
+};
 ```
-TRIG:  GPIO 5  →  GPIO 4   ⚠️ obrigatório (GPIO 5 é o reset do LoRaWAN Bee)
-ECHO:  GPIO 18 →  GPIO 18  (sem mudança)
-```
+
+> Para descobrir o IP do PC no Windows: `ipconfig` → "Endereço IPv4" do adaptador Wi-Fi.
 
 ---
 
 ## Passo 1 — Gravar o Nó 1
 
-1. Conectar o **primeiro ESP32 sensor** via USB
-2. Verificar/ajustar a porta no `platformio.ini` → `[env:node1]` → `upload_port`
+1. Conectar o ESP32 nó via USB
+2. Ajustar a porta em `platformio.ini` → `[env:node1]` → `upload_port`
 3. Gravar:
 
 ```bash
@@ -37,106 +58,48 @@ Saída esperada:
 
 ---
 
-## Passo 2 — Gravar o Nó 2
+## Passo 2 — Gravar o Gateway
 
-1. **Trocar o cabo USB** para o **segundo ESP32 sensor**
-2. Verificar/ajustar a porta no `platformio.ini` → `[env:node2]` → `upload_port`
+1. Trocar o cabo USB para o ESP32 gateway
+2. Ajustar a porta em `platformio.ini` → `[env:gateway]` → `upload_port`
 3. Gravar:
-
-```bash
-pio run -e node2 -t upload
-```
-
-4. Verificar no monitor serial:
-
-```bash
-pio device monitor -e node2
-```
-
-Saída esperada:
-```
-[Node 2] iniciando...
-[LoRa] P2P pronto
-[LoRa] enviando: 2:41.0
-```
-
----
-
-## Passo 3 — Gravar o Gateway
-
-1. Conectar o **ESP32 gateway** (o que tem WiFi + OLED) via USB
-2. Verificar/ajustar a porta no `platformio.ini` → `[env:gateway]` → `upload_port`
-3. Abrir `src_gateway/config.h` e atualizar as credenciais WiFi e o IP do servidor:
-
-```cpp
-#define WIFI_SSID     "sua_rede"
-#define WIFI_PASSWORD "sua_senha"
-#define SERVER_IP     "IP_DO_SERVIDOR"
-```
-
-4. Gravar:
 
 ```bash
 pio run -e gateway -t upload
 ```
 
-5. Verificar no monitor serial:
+4. Verificar no monitor serial:
 
 ```bash
 pio device monitor -e gateway
 ```
 
-Saída esperada (com os nós já ligados):
+Saída esperada (com o nó já ligado e a API rodando):
 ```
 [Gateway] iniciando...
-[WiFi] conectado: 10.198.x.x
+[WiFi] conectado: 192.168.x.x
 [LoRa] gateway P2P pronto
+[sensor local] dist=18.2 cm
+[sensor local] fill=64.3% recipiente=Pote de Arroz
 [LoRa] recebido: 1:23.5
-[HTTP] node=1 dist=23.5 fill=47.0% status=200
-[LoRa] recebido: 2:41.0
-[HTTP] node=2 dist=41.0 fill=18.0% status=200
+[HTTP] node=1 dist=23.5 fill=47.0% recipiente=Pote de Sal status=201
 ```
 
 ---
 
-## Como testar a conexão LoRa entre as placas
+## Como testar a comunicação LoRa
 
-### Via LED (visual, sem cabo)
-
-Cada placa tem um LED onboard no **GPIO 2** que indica atividade LoRa:
+O LED onboard (GPIO 2) pisca para indicar atividade:
 
 | Placa | Evento | LED |
 |---|---|---|
-| **Nó 1 / Nó 2** | Enviou com sucesso via LoRa | 1 piscada (80 ms) |
+| **Nó** | Enviou via LoRa com sucesso | 1 piscada (80 ms) |
 | **Gateway** | Recebeu dado via LoRa | 2 piscadas rápidas (60 ms cada) |
 
 **Fluxo de teste:**
-1. Ligue o **gateway** → espere o LED piscar 1x ao iniciar (não há blink de init, mas o Serial dirá `P2P pronto`)
-2. Ligue um **nó** → a cada ~5 s ele pisca 1x ao enviar
-3. No mesmo instante, o **gateway pisca 2x** → conexão LoRa funcionando ✅
-4. Se o nó pisca mas o gateway não → problema de alcance, chaves ou sync word
-
-> Se o LED não responder, o pino pode ser diferente de GPIO 2 no seu IoT DevKit.
-> Ajuste `PIN_LED` em `src_node/config.h` e `src_gateway/config.h`.
-
-### Via Serial Monitor (mais detalhado)
-
-Com o gateway conectado ao PC:
-
-```bash
-pio device monitor -e gateway
-```
-
-Cada mensagem recebida aparece como:
-```
-[LoRa] recebido: 1:23.5
-[HTTP] node=1 dist=23.5 fill=47.0% status=200
-```
-
-Para ver o nó enviando simultaneamente, abra um segundo terminal:
-```bash
-pio device monitor -e node1
-```
+1. Ligue o gateway → espere `[LoRa] gateway P2P pronto` no serial
+2. Ligue o nó → a cada ~5 s ele pisca 1x ao enviar
+3. No mesmo instante o gateway pisca 2x → LoRa funcionando ✅
 
 ---
 
@@ -144,9 +107,10 @@ pio device monitor -e node1
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
-| `[LoRa] P2P pronto` nunca aparece | TRIG ainda no GPIO 5 | Mover fio para GPIO 4 |
-| Nó pisca mas gateway não | Chaves AppSKey/NwkSKey ou sync word diferentes | Comparar `src_node/config.h` e `src_gateway/config.h` |
-| Nó não pisca ao enviar | `sendT` retornou erro | Ver `[LoRa] erro no envio` no serial do nó |
-| LED não responde em nenhuma placa | Pino do LED diferente de GPIO 2 | Ajustar `PIN_LED` nos dois `config.h` |
-| `[LoRa] parse falhou` no gateway | Formato inesperado | Ver mensagem bruta no serial |
-| HTTP 400/422 no servidor | Servidor não aceita `node_id` | Adicionar `node_id` ao endpoint do servidor |
+| `[LoRa] P2P pronto` nunca aparece | Problema na inicialização do módulo LoRa | Verificar conexão UART (RXD=16, TXD=17, RESET=5) |
+| Nó pisca mas gateway não recebe | Chaves ou sync word diferentes | Comparar `src_node/config.h` e `src_gateway/config.h` |
+| `[HTTP] node=X sem device_token configurado` | Token não preenchido no config | Adicionar o device_token correto em `NODE_TOKENS[]` |
+| `[HTTP] erro: 401` | device_token inválido ou errado | Copiar o token correto da tela de detalhe do pote no app |
+| `[HTTP] erro: -1` | API não está rodando ou IP errado | Verificar `SERVER_IP` e se a API está no ar |
+| `[sensor local] sem leitura` | HC-SR04 sem objeto na frente | Normal se não houver nada no campo de visão do sensor |
+| Serial com caracteres estranhos | Baud rate errado | Confirmar `monitor_speed = 115200` |

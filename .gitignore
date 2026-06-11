@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+.pio/
+.vscode/
+.superpowers/
+.claude/

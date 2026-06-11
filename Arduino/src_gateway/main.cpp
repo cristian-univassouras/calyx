@@ -24,9 +24,6 @@ bool loraReady = false;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 bool displayOk = false;
 
-// ─── SERVIDOR ─────────────────────────────────────────────────
-const char *serverName = "http://" SERVER_IP ":8000/post";
-
 // ─── PARSE ────────────────────────────────────────────────────
 // Recebe "1:23.5", preenche nodeId e dist. Retorna false se inválido.
 bool parseMensagem(const char *msg, int &nodeId, float &dist) {
@@ -37,8 +34,17 @@ bool parseMensagem(const char *msg, int &nodeId, float &dist) {
   return nodeId > 0 && dist >= 0;
 }
 
+// ─── LOOKUP device_token ──────────────────────────────────────
+const char *getDeviceToken(int nodeId) {
+  for (int i = 0; i < NODE_TOKENS_COUNT; i++) {
+    if (NODE_TOKENS[i].nodeId == nodeId)
+      return NODE_TOKENS[i].deviceToken;
+  }
+  return nullptr;
+}
+
 // ─── OLED ─────────────────────────────────────────────────────
-void showDisplay(const String &name, float fillPct, const String &nivel) {
+void showDisplay(const String &name, float fillPct) {
   if (!displayOk) return;
   display.clearDisplay();
   display.setTextColor(SSD1306_WHITE);
@@ -64,29 +70,47 @@ void showDisplay(const String &name, float fillPct, const String &nivel) {
     display.fillRect(3, barY + 1, fillPx, barH - 2, SSD1306_WHITE);
 
   display.display();
-  display.invertDisplay(nivel == "vazio");
+  display.invertDisplay(fillPct < 10.0f);
 }
 
-// ─── HTTP POST ────────────────────────────────────────────────
+// ─── HTTP POST → /ingest ──────────────────────────────────────
 void enviarHTTP(int nodeId, float dist) {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("[WiFi] sem conexao, descartando mensagem");
     return;
   }
-  HTTPClient http;
-  http.begin(serverName);
-  http.setTimeout(3000);
-  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-  String body = "distancia=" + String(dist, 1) + "cm&node_id=" + String(nodeId);
-  int code = http.POST(body);
+  const char *token = getDeviceToken(nodeId);
+  if (!token) {
+    Serial.printf("[HTTP] node_id=%d sem device_token configurado\n", nodeId);
+    return;
+  }
+
+  char url[64];
+  snprintf(url, sizeof(url), "http://" SERVER_IP ":%d/ingest", SERVER_PORT);
+
+  // Body JSON: { "distance_from_lid": 23.5 }
+  StaticJsonDocument<64> bodyDoc;
+  bodyDoc["distance_from_lid"] = dist;
+  char bodyStr[64];
+  serializeJson(bodyDoc, bodyStr, sizeof(bodyStr));
+
+  HTTPClient http;
+  http.begin(url);
+  http.setTimeout(1500);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("X-Device-Token", token);
+
+  int code = http.POST(bodyStr);
 
   if (code > 0) {
     StaticJsonDocument<256> doc;
     if (deserializeJson(doc, http.getString()) == DeserializationError::Ok) {
-      showDisplay(doc["container"] | "", doc["fill_pct"] | 0.0f, doc["nivel"] | "vazio");
-      Serial.printf("[HTTP] node=%d dist=%.1f fill=%.1f%% status=%d\n",
-                    nodeId, dist, (float)(doc["fill_pct"] | 0.0f), code);
+      const char *name = doc["recipient_name"] | "";
+      float fillPct    = doc["fill_percent"]   | 0.0f;
+      showDisplay(name, fillPct);
+      Serial.printf("[HTTP] node=%d dist=%.1f fill=%.1f%% recipiente=%s status=%d\n",
+                    nodeId, dist, fillPct, name, code);
     }
   } else {
     Serial.printf("[HTTP] erro: %d\n", code);
@@ -102,12 +126,13 @@ void event_handler(Event type) {
     return;
   }
 
-  if (type == Event::RECEIVED) {
+  if (type == Event::RECEIVED_X) {
+    delay(50);
+    lorawan.flush();
     uint8_t port;
     Buffer buf;
-    if (lorawan.readT(port, buf) != CommandResponse::OK) return;
+    if (lorawan.readX(port, buf) != CommandResponse::OK) return;
 
-    // Buffer → char array usando a API nativa (available + read)
     char msg[32] = {0};
     int i = 0;
     while (buf.available() && i < (int)sizeof(msg) - 1)
@@ -115,7 +140,6 @@ void event_handler(Event type) {
 
     Serial.printf("[LoRa] recebido: %s\n", msg);
 
-    // 2 piscadas rápidas = dado LoRa recebido
     for (int i = 0; i < 2; i++) {
       digitalWrite(PIN_LED, HIGH); delay(60);
       digitalWrite(PIN_LED, LOW);  delay(60);
@@ -172,14 +196,14 @@ void setup() {
   lorawan.event_listener = &event_handler;
   lorawan.setPinReset(LORA_RESET);
   lorawan.reset();
-  delay(1000);
+  delay(2000);
 
-  lorawan.set_JoinMode(SMW_SX1276M0_JOIN_MODE_P2P);
   lorawan.set_DevAddr(LORA_DEV_ADDR);
+  lorawan.set_P2P_DevAddr("00000000");
   lorawan.set_AppSKey(LORA_APP_SKEY);
   lorawan.set_NwkSKey(LORA_NWK_SKEY);
   lorawan.set_P2P_SyncWord(LORA_SYNC_WORD);
-
+  lorawan.set_JoinMode(SMW_SX1276M0_JOIN_MODE_P2P);
   lorawan.join();
   Serial.println("[LoRa] aguardando P2P join...");
 }
@@ -188,10 +212,12 @@ void setup() {
 void loop() {
   lorawan.listen();
 
+  // Reconexão WiFi
   static unsigned long lastWifiAttempt = 0;
   if (WiFi.status() != WL_CONNECTED && millis() - lastWifiAttempt > 5000) {
     lastWifiAttempt = millis();
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     Serial.println("[WiFi] reconectando...");
   }
+
 }
