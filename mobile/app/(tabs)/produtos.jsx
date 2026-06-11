@@ -6,9 +6,11 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { api } from '../../src/api';
-import { theme } from '../../src/theme';
+import { useAppTheme } from '../../src/theme';
 
 function ProductModal({ visible, product, categories, onClose, onSaved }) {
+  const theme = useAppTheme();
+  const ms = getModalStyles(theme);
   const isNew = product === 'new';
   const [form, setForm] = useState({ name: '', density: '', icon: '', content_category: '' });
   const [error, setError] = useState('');
@@ -122,6 +124,8 @@ function ProductModal({ visible, product, categories, onClose, onSaved }) {
 }
 
 export default function Produtos() {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const [products,   setProducts]   = useState([]);
   const [categories, setCategories] = useState([]);
   const [editing,    setEditing]    = useState(null);
@@ -213,7 +217,7 @@ export default function Produtos() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   screen:     { flex: 1, backgroundColor: theme.bg },
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.bg },
   header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16, backgroundColor: theme.panel, borderBottomWidth: 1, borderBottomColor: theme.border },
@@ -231,7 +235,7 @@ const s = StyleSheet.create({
   loadError:  { color: theme.danger, fontSize: 13, paddingHorizontal: 16, paddingTop: 8 },
 });
 
-const ms = StyleSheet.create({
+const getModalStyles = (theme) => StyleSheet.create({
   screen:          { flex: 1, backgroundColor: theme.bg },
   header:          { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 50, backgroundColor: theme.panel, borderBottomWidth: 1, borderBottomColor: theme.border },
   title:           { fontSize: 18, fontWeight: 'bold', color: theme.text },

@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { theme } from '../src/theme';
+import { useAppTheme } from '../src/theme';
 
 function hashColor(name = '') {
   let h = 0;
@@ -9,6 +9,8 @@ function hashColor(name = '') {
 }
 
 export default function ProductPicker({ products = [], value = '', onChange }) {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const items = [
     { id: '', name: 'Sem produto', icon: null, density: null },
     ...products,
@@ -50,7 +52,7 @@ export default function ProductPicker({ products = [], value = '', onChange }) {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   card:         { width: 90, alignItems: 'center', padding: 10, borderRadius: 10, borderWidth: 2, borderColor: theme.border, backgroundColor: theme.panel, gap: 4 },
   selected:     { borderColor: theme.accent2, backgroundColor: theme.accentSoft },
   emoji:        { fontSize: 24 },

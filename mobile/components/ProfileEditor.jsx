@@ -1,10 +1,12 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
-import { theme } from '../src/theme';
+import { useAppTheme } from '../src/theme';
 
 let _rowId = 0;
 
 export default function ProfileEditor({ value = [[0, 0]], onChange }) {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const rows = value.length > 0 ? value : [[0, 0]];
   const idsRef = React.useRef(rows.map(() => ++_rowId));
 
@@ -65,7 +67,7 @@ export default function ProfileEditor({ value = [[0, 0]], onChange }) {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   container:  { gap: 6 },
   headerRow:  { flexDirection: 'row', gap: 8, paddingBottom: 4 },
   row:        { flexDirection: 'row', gap: 8, alignItems: 'center' },

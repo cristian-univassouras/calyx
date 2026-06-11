@@ -8,10 +8,12 @@ import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import ShapeIcon from '../../../components/ShapeIcon';
 import { api } from '../../../src/api';
-import { theme } from '../../../src/theme';
+import { useAppTheme } from '../../../src/theme';
 import { totalVolume, totalHeight, filledVolume, fmtNum, FORMATS } from '../../../src/calc';
 
 export default function RecipientDetail() {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const { id } = useLocalSearchParams();
   const router  = useRouter();
 
@@ -301,7 +303,7 @@ export default function RecipientDetail() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   screen:           { flex: 1, backgroundColor: theme.bg },
   center:           { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.bg },
   headerRow:        { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingTop: 50 },

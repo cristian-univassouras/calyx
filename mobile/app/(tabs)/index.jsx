@@ -5,10 +5,10 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { api } from '../../src/api';
-import { theme } from '../../src/theme';
+import { useAppTheme } from '../../src/theme';
 import ShapeIcon from '../../components/ShapeIcon';
 
-function fillColor(pct) {
+function fillColor(pct, theme) {
   if (pct == null) return theme.muted;
   if (pct > 60) return '#4caf50';
   if (pct > 25) return '#ff9800';
@@ -24,10 +24,12 @@ function timeSince(dateStr) {
 }
 
 function RecipientCard({ item, onPress }) {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const pct = item._fill?.fill_percent ?? null;
   const weight = item._fill?.estimated_weight_g ?? null;
   const lastAt = item._fill?.measured_at ?? null;
-  const color = fillColor(pct);
+  const color = fillColor(pct, theme);
 
   return (
     <TouchableOpacity style={s.card} onPress={onPress}>
@@ -56,6 +58,8 @@ function RecipientCard({ item, onPress }) {
 }
 
 export default function RecipientesTab() {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const router = useRouter();
   const [recipients, setRecipients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,7 +139,7 @@ export default function RecipientesTab() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   root:       { flex: 1, backgroundColor: theme.bg },
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.bg },
   list:       { padding: 16, gap: 12, paddingBottom: 80 },

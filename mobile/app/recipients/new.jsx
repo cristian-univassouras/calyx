@@ -4,9 +4,11 @@ import { View, StyleSheet } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import RecipientForm from '../../components/RecipientForm';
 import { api } from '../../src/api';
-import { theme } from '../../src/theme';
+import { useAppTheme } from '../../src/theme';
 
 export default function NewRecipient() {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const router = useRouter();
   const [products, setProducts] = useState([]);
 
@@ -37,6 +39,6 @@ export default function NewRecipient() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
 });

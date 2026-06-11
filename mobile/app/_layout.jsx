@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from '../src/auth';
+import { ThemeProvider } from '../src/theme';
 
 function AuthGuard() {
   const { user, loading } = useAuth();
@@ -19,7 +20,8 @@ function AuthGuard() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
       <AuthGuard />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
@@ -27,6 +29,7 @@ export default function RootLayout() {
         <Stack.Screen name="register" />
         <Stack.Screen name="recipients" />
       </Stack>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

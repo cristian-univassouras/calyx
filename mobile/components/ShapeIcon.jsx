@@ -3,7 +3,7 @@ import Svg, {
   Defs, ClipPath, Path, Rect,
   Ellipse, Line, Circle, G,
 } from 'react-native-svg';
-import { theme } from '../src/theme';
+import { useAppTheme } from '../src/theme';
 
 let _uid = 0;
 
@@ -84,6 +84,7 @@ const SHAPES = {
 };
 
 export default function ShapeIcon({ format, fill = null, size = 96 }) {
+  const theme = useAppTheme();
   const shape = SHAPES[format] || SHAPES.cilindric;
   const clipId = React.useRef(`sc${++_uid}`).current;
   const sw = (3 * 100) / size;

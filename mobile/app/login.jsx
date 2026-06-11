@@ -6,9 +6,11 @@ import {
 import { useRouter } from 'expo-router';
 import { Link } from 'expo-router';
 import { useAuth } from '../src/auth';
-import { theme } from '../src/theme';
+import { useAppTheme } from '../src/theme';
 
 export default function Login() {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
@@ -81,7 +83,7 @@ export default function Login() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   screen:    { flex: 1, backgroundColor: theme.bg, alignItems: 'center', justifyContent: 'center', padding: 20 },
   card:      { backgroundColor: theme.panel, borderRadius: theme.radius, padding: 28, width: '100%', maxWidth: 400, borderWidth: 1, borderColor: theme.border },
   brand:     { fontSize: 26, color: theme.muted, textAlign: 'center', marginBottom: 4 },

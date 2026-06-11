@@ -6,9 +6,11 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { api } from '../../src/api';
-import { theme } from '../../src/theme';
+import { useAppTheme } from '../../src/theme';
 
 function CategoryProductsModal({ category, products, onClose }) {
+  const theme = useAppTheme();
+  const ms = getModalStyles(theme);
   const filtered = products.filter((p) => p.content_category === category?.id);
 
   return (
@@ -41,6 +43,8 @@ function CategoryProductsModal({ category, products, onClose }) {
 }
 
 export default function Categorias() {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const [categories,    setCategories]    = useState([]);
   const [products,      setProducts]      = useState([]);
   const [loading,       setLoading]       = useState(true);
@@ -100,7 +104,7 @@ export default function Categorias() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   screen:  { flex: 1, backgroundColor: theme.bg },
   center:  { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.bg },
   header:  { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16, backgroundColor: theme.panel, borderBottomWidth: 1, borderBottomColor: theme.border },
@@ -113,7 +117,7 @@ const s = StyleSheet.create({
   empty:   { textAlign: 'center', color: theme.muted, marginTop: 40 },
 });
 
-const ms = StyleSheet.create({
+const getModalStyles = (theme) => StyleSheet.create({
   screen:  { flex: 1, backgroundColor: theme.bg },
   header:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 50, backgroundColor: theme.panel, borderBottomWidth: 1, borderBottomColor: theme.border },
   title:   { fontSize: 18, fontWeight: 'bold', color: theme.text },

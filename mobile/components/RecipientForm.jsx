@@ -3,13 +3,15 @@ import {
   View, Text, TextInput, TouchableOpacity,
   ScrollView, StyleSheet, ActivityIndicator,
 } from 'react-native';
-import { theme } from '../src/theme';
+import { useAppTheme } from '../src/theme';
 import { FORMATS, KEY_LABELS, normalizeProfile, totalVolume, dimensionsReady, fmtNum } from '../src/calc';
 import ShapeIcon from './ShapeIcon';
 import ProductPicker from './ProductPicker';
 import ProfileEditor from './ProfileEditor';
 
 export default function RecipientForm({ initial = {}, products = [], onSubmit, submitLabel = 'Salvar' }) {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const [name, setName] = useState(initial.name || '');
   const [format, setFormat] = useState(initial.format || 'cilindric');
   const [dims, setDims] = useState(initial.dimensions || {});
@@ -123,7 +125,7 @@ export default function RecipientForm({ initial = {}, products = [], onSubmit, s
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   container:      { padding: 16, gap: 4, paddingBottom: 48 },
   label:          { fontSize: 13, color: theme.muted, fontWeight: '600', marginTop: 14, marginBottom: 4 },
   input:          { borderWidth: 1, borderColor: theme.border, borderRadius: 8, padding: 12, fontSize: 15, color: theme.text, backgroundColor: theme.panel },

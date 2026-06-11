@@ -7,9 +7,11 @@ import { useRouter } from 'expo-router';
 import { Link } from 'expo-router';
 import { useAuth } from '../src/auth';
 import { api } from '../src/api';
-import { theme } from '../src/theme';
+import { useAppTheme } from '../src/theme';
 
 export default function Register() {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [busy,  setBusy]  = useState(false);
@@ -72,7 +74,7 @@ export default function Register() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   screen:    { flex: 1, backgroundColor: theme.bg, alignItems: 'center', justifyContent: 'center', padding: 20 },
   card:      { backgroundColor: theme.panel, borderRadius: theme.radius, padding: 28, width: '100%', maxWidth: 400, borderWidth: 1, borderColor: theme.border },
   title:     { fontSize: 22, fontWeight: 'bold', color: theme.text, textAlign: 'center', marginBottom: 4 },

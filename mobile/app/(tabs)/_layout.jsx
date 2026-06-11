@@ -1,12 +1,13 @@
 import { Tabs } from 'expo-router';
 import { Text } from 'react-native';
-import { theme } from '../../src/theme';
+import { useAppTheme } from '../../src/theme';
 
 function Icon({ emoji }) {
   return <Text style={{ fontSize: 18 }}>{emoji}</Text>;
 }
 
 export default function TabsLayout() {
+  const theme = useAppTheme();
   return (
     <Tabs
       screenOptions={{
@@ -16,6 +17,9 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: theme.panel,
           borderTopColor: theme.border,
+          height: 75,
+          paddingBottom: 10,
+          paddingTop: 8,
         },
       }}
     >

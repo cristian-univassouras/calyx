@@ -4,9 +4,11 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import RecipientForm from '../../../components/RecipientForm';
 import { api } from '../../../src/api';
-import { theme } from '../../../src/theme';
+import { useAppTheme } from '../../../src/theme';
 
 export default function EditRecipient() {
+  const theme = useAppTheme();
+  const s = getStyles(theme);
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [recipient, setRecipient] = useState(null);
@@ -59,7 +61,7 @@ export default function EditRecipient() {
   );
 }
 
-const s = StyleSheet.create({
+const getStyles = (theme) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.bg },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.bg },
   error:  { color: theme.danger, fontSize: 14 },
