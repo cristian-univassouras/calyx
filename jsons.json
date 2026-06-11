@@ -1,0 +1,7 @@
+[
+    {"cilindric":	{"radius": 5.0, "height": 20.0}},
+    {"square":	{"side": 10.0, "height": 20.0}},
+    {"rectangular":	{"width": 8.0, "length": 12.0, "height": 20.0}},
+    {"conical":	{"base_radius": 5.0, "height": 15.0}},
+    {"spherical":	{"radius": 7.5}}
+]

@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16
+    container_name: calyx-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-calyx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-calyx}
+      POSTGRES_DB: ${POSTGRES_DB:-calyx}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - calyx_pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-calyx} -d ${POSTGRES_DB:-calyx}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./api
+    container_name: calyx-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-calyx}:${POSTGRES_PASSWORD:-calyx}@db:5432/${POSTGRES_DB:-calyx}
+      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+    container_name: calyx-frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+
+volumes:
+  calyx_pgdata:
