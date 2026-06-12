@@ -1,0 +1,31 @@
+{
+  "containers": {
+    "8469bf6f": {
+      "name": "Lixeira",
+      "height": 30.0
+    },
+    "2329533b": {
+      "name": "Caixa Dagua",
+      "height": 200.0
+    },
+    "27717063": {
+      "name": "Copo",
+      "height": 15.0,
+      "lat": null,
+      "lng": null
+    },
+    "3d5eee18": {
+      "name": "Pote de Creatina (Protótipo)",
+      "height": 8.0,
+      "lat": -22.930216,
+      "lng": -42.745443
+    },
+    "120fc1d5": {
+      "name": "Tampa de garrafa",
+      "height": 1.0,
+      "lat": -22.917131,
+      "lng": -42.81298
+    }
+  },
+  "active_id": "3d5eee18"
+}

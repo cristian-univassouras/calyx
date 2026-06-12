@@ -1,0 +1,372 @@
+:root {
+  /* Paleta "cozinha / despensa": branco, creme e madeira */
+  --bg: #f5ece0;          /* parede creme */
+  --panel: #fffdf9;       /* etiqueta branca */
+  --panel-2: #f3e8d6;     /* creme/madeira clara */
+  --border: #e3d3bb;
+  --text: #3b2c1d;        /* marrom escuro (cafe) */
+  --muted: #927a60;
+  --accent: #9c6b3f;      /* madeira / canela */
+  --accent-2: #7d5430;    /* madeira escura */
+  --accent-soft: #e9d9c2;
+  --danger: #b23a2e;
+  --honey: #d9a441;       /* nivel do conteudo */
+  --radius: 14px;
+  --shadow: 0 2px 6px rgba(90, 60, 30, 0.08);
+  --shadow-lg: 0 10px 24px rgba(90, 60, 30, 0.14);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a { color: var(--accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Topo com cara de prateleira/armario de madeira */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  color: #fdf6ea;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 2px, transparent 2px 26px),
+    linear-gradient(180deg, #8a5a32 0%, #774a26 100%);
+  border-bottom: 4px solid #5e3a1d;
+  box-shadow: var(--shadow);
+}
+.topbar .brand { font-weight: 800; font-size: 20px; letter-spacing: 2px; }
+.topbar .brand span { color: var(--honey); }
+.topbar nav a { margin-left: 18px; color: #efe0cc; font-size: 14px; }
+.topbar nav a:hover { color: #fff; text-decoration: none; }
+.topbar nav a.active { color: #fff; font-weight: 600; }
+
+.container { max-width: 920px; margin: 0 auto; padding: 28px 20px; }
+.center-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, #fbf4e8 0%, var(--bg) 60%);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.card + .card { margin-top: 18px; }
+
+h1 { font-size: 25px; margin: 0 0 4px; }
+h2 { font-size: 18px; margin: 0 0 16px; display: flex; align-items: center; gap: 6px; }
+.subtitle { color: var(--muted); margin: 0 0 22px; font-size: 14px; }
+
+label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+
+input, select {
+  width: 100%;
+  padding: 10px 12px;
+  background: #fffefb;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 14px;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+input:disabled { background: var(--panel-2); color: var(--muted); }
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 9px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff6ea;
+  transition: background 0.15s, transform 0.1s;
+}
+button:hover { background: var(--accent-2); }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+button.secondary:hover { background: var(--accent-soft); }
+button.danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+button.danger:hover { background: rgba(178,58,46,0.08); }
+.btn-row { display: flex; gap: 10px; margin-top: 20px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+
+.error { color: var(--danger); font-size: 13px; margin-top: 12px; }
+.muted { color: var(--muted); }
+.accent { color: var(--accent-2); }
+
+.list-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px;
+  margin-bottom: 10px; background: var(--panel-2); cursor: pointer;
+}
+.list-item:hover { border-color: var(--accent); }
+.list-item .meta { color: var(--muted); font-size: 13px; margin-top: 3px; }
+
+.badge {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 3px 9px; border-radius: 20px;
+  background: var(--accent-soft); color: var(--accent-2);
+  border: 1px solid var(--border);
+}
+
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 8px; }
+.stat { background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.stat .label { font-size: 12px; color: var(--muted); }
+.stat .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+.stat .value.accent { color: var(--accent-2); }
+
+.gauge {
+  height: 14px; background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden; margin: 6px 0 2px;
+}
+.gauge > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--honey), #c98a2e);
+  transition: width 0.4s;
+}
+
+.link-btn { background: none; color: var(--accent-2); padding: 0; font-weight: 600; }
+.link-btn:hover { background: none; }
+.spacer { flex: 1; }
+.empty { text-align: center; color: var(--muted); padding: 40px 0; }
+
+/* ---------- Ilustracao de formato (SVG) ---------- */
+.shape-icon { display: block; }
+.shape-liquid { fill: var(--honey); opacity: 0.45; }
+
+/* ---------- Layout 2 colunas (menu lateral + estante) ---------- */
+.layout-cols { display: flex; gap: 20px; align-items: flex-start; margin-top: 14px; }
+.sidebar {
+  width: 240px; flex-shrink: 0;
+  position: sticky; top: 16px;
+  padding: 16px;
+}
+.sidebar h2 { margin-bottom: 12px; }
+.main-col { flex: 1; min-width: 0; }
+@media (max-width: 760px) {
+  .layout-cols { flex-direction: column; }
+  .sidebar { width: 100%; position: static; }
+}
+
+.loose-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; margin-bottom: 8px;
+  border: 1px solid var(--border); border-radius: 9px;
+  background: var(--panel-2); cursor: grab;
+  transition: border-color 0.12s, transform 0.12s;
+}
+.loose-item:hover { border-color: var(--accent); }
+.loose-item:active { cursor: grabbing; transform: scale(0.98); }
+.loose-name {
+  font-weight: 600; font-size: 13px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* realce do alvo durante o arraste */
+.drag-over { outline: 2px dashed var(--accent); outline-offset: 3px; }
+.sidebar.drag-over { background: var(--accent-soft); }
+
+/* ---------- Lista de produtos (CRUD) ---------- */
+.prod-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 4px; border-bottom: 1px solid var(--border);
+}
+.prod-row:last-child { border-bottom: none; }
+.prod-emoji {
+  width: 40px; height: 40px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; background: var(--panel-2);
+  border: 1px solid var(--border); border-radius: 9px;
+}
+.prod-name { font-weight: 600; }
+
+/* ---------- Modal (popup do armario) ---------- */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(45, 28, 12, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 780px; max-height: 86vh; overflow: auto;
+  padding: 24px;
+}
+.modal-head { display: flex; align-items: center; gap: 8px; }
+
+/* ---------- Estante de armarios ---------- */
+.cabinet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 18px;
+  margin-top: 14px;
+}
+.cabinet-card {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 14px 16px;
+  color: var(--text); font: inherit;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.cabinet-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+.cabinet-doors {
+  position: relative;
+  width: 100%; height: 140px;
+  border-radius: 10px; overflow: hidden;
+  border: 2px solid #5e3a1d;
+  /* interior do armario (prateleira) */
+  background: linear-gradient(180deg, #efe2cd 0%, #e3d0b3 100%);
+}
+.cabinet-emoji {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px;
+}
+.door {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,0.04) 0 3px, transparent 3px 14px),
+    linear-gradient(90deg, #a9744f 0%, #8a5a32 100%);
+  transition: transform 0.4s ease;
+  z-index: 2;
+}
+.door-l { left: 0; border-right: 1px solid #5e3a1d; }
+.door-r { right: 0; border-left: 1px solid #5e3a1d; }
+.knob {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--honey); box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+}
+.door-l .knob { right: 7px; }
+.door-r .knob { left: 7px; }
+.cabinet-card:hover .door-l { transform: translateX(-100%); }
+.cabinet-card:hover .door-r { transform: translateX(100%); }
+.cabinet-doors.loose { background: var(--panel-2); }
+
+.cabinet-name { font-weight: 700; font-size: 16px; margin-top: 12px; }
+.cabinet-count { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+.shelf { margin-top: 14px; }
+
+/* ---------- Hub de recipientes (potes na prateleira) ---------- */
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+.hub-card {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 16px 18px;
+  color: var(--text); font: inherit;
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.hub-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.hub-badge { position: absolute; top: 12px; right: 12px; }
+.hub-illu { color: var(--accent); margin: 6px 0 14px; }
+.hub-name { font-weight: 700; font-size: 16px; }
+.hub-meta { font-size: 13px; color: var(--text); margin-top: 4px; }
+.hub-meta.muted { color: var(--muted); font-size: 12px; }
+.hub-fill { font-size: 14px; font-weight: 700; margin-top: 6px; color: var(--accent-2); }
+
+/* ---------- Seletor grafico (formato / produto) ---------- */
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+}
+.pick-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: var(--panel-2);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 10px;
+  color: var(--text); font: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+.pick-card:hover { border-color: var(--accent); }
+.pick-card.selected { border-color: var(--accent); background: var(--accent-soft); }
+.pick-illu { color: var(--accent); }
+.pick-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px; color: #fff6ea;
+}
+.pick-emoji {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; line-height: 1;
+}
+.pick-title { font-weight: 600; font-size: 14px; }
+.pick-sub { font-size: 12px; color: var(--muted); }
+
+/* ---------- Editor de curva de calibracao (custom) ---------- */
+.profile-row {
+  display: grid; grid-template-columns: 1fr 1fr 36px; gap: 10px;
+  align-items: center; margin-bottom: 8px;
+}
+.profile-head { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.profile-del {
+  background: transparent; color: var(--danger);
+  border: 1px solid var(--border); padding: 8px 0;
+}
+.profile-del:hover { border-color: var(--danger); background: rgba(178,58,46,0.08); }
+.profile-base { text-align: center; font-size: 12px; }
+
+/* ---------- Bloco do dispositivo (token + snippet) ---------- */
+.token-box {
+  display: flex; gap: 8px; align-items: center;
+  background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 13px; word-break: break-all;
+}
+.code-block {
+  background: #efe2cd;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 12.5px; color: #5a4632;
+  white-space: pre-wrap; overflow-x: auto; margin-top: 10px;
+}
+.live-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: #4a9d52; margin-right: 4px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* ---------- Visualizacao de preenchimento (detalhe) ---------- */
+.fill-view { display: flex; gap: 22px; align-items: center; margin-top: 18px; }
+.fill-shape { flex-shrink: 0; color: var(--accent); }
+@media (max-width: 560px) { .fill-view { flex-direction: column; } }
