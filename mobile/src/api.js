@@ -7,7 +7,7 @@ export const getToken   = ()    => AsyncStorage.getItem(TOKEN_KEY);
 export const setToken   = (t)   => AsyncStorage.setItem(TOKEN_KEY, t);
 export const clearToken = ()    => AsyncStorage.removeItem(TOKEN_KEY);
 
-async function request(path, { method = 'GET', body, form, auth } = {}) {
+async function request(path, { method = 'GET', body, form, auth, nullOn404 = false } = {}) {
   const headers = {};
   if (auth) {
     const token = await getToken();
@@ -27,6 +27,7 @@ async function request(path, { method = 'GET', body, form, auth } = {}) {
   });
 
   if (!res.ok) {
+    if (nullOn404 && res.status === 404) return null;
     let msg;
     try {
       const j = await res.json();
@@ -67,7 +68,7 @@ export const api = {
   // Measurements
   createMeasurement: (id, distance) =>
     request(`/recipients/${id}/measurements`, { method: 'POST', body: { distance_from_lid: distance }, auth: true }),
-  currentFill:      (id)          => request(`/recipients/${id}/fill`,                    { auth: true }),
+  currentFill:      (id)          => request(`/recipients/${id}/fill`,                    { auth: true, nullOn404: true }),
   listMeasurements: (id, limit = 50) =>
     request(`/recipients/${id}/measurements?limit=${limit}`,                              { auth: true }),
 };

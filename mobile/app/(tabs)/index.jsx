@@ -88,6 +88,8 @@ export default function RecipientesTab() {
     useCallback(() => {
       setLoading(true);
       loadRecipients().finally(() => setLoading(false));
+      const t = setInterval(loadRecipients, 5000);
+      return () => clearInterval(t);
     }, [loadRecipients])
   );
 
@@ -107,6 +109,9 @@ export default function RecipientesTab() {
 
   return (
     <View style={s.root}>
+      <View style={s.header}>
+        <Text style={s.title}>Recipientes</Text>
+      </View>
       <FlatList
         data={recipients}
         keyExtractor={(item) => String(item.id)}
@@ -141,6 +146,8 @@ export default function RecipientesTab() {
 
 const getStyles = (theme) => StyleSheet.create({
   root:       { flex: 1, backgroundColor: theme.bg },
+  header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16, backgroundColor: theme.panel, borderBottomWidth: 1, borderBottomColor: theme.border },
+  title:      { fontSize: 22, fontWeight: 'bold', color: theme.text },
   center:     { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.bg },
   list:       { padding: 16, gap: 12, paddingBottom: 80 },
   card:       { flexDirection: 'row', backgroundColor: theme.panel, borderRadius: theme.radius, borderWidth: 1, borderColor: theme.border, padding: 12, alignItems: 'center', gap: 12 },

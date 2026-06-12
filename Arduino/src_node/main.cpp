@@ -2,22 +2,10 @@
 #error Use este firmware com o ESP32
 #endif
 
-#include <RoboCore_SMW_SX1276M0.h>
-#include <HardwareSerial.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
 #include "config.h"
-
-HardwareSerial LoRaSerial(2);
-SMW_SX1276M0 lorawan(LoRaSerial);
-CommandResponse resp;
-
-bool loraReady = false;
-
-void event_handler(Event type) {
-  if (type == Event::JOINED) {
-    loraReady = true;
-    Serial.println("[LoRa] P2P pronto");
-  }
-}
 
 float medirDistancia() {
   digitalWrite(PIN_TRIG, LOW);  delayMicroseconds(4);
@@ -37,49 +25,59 @@ void setup() {
   pinMode(PIN_LED, OUTPUT);
   digitalWrite(PIN_LED, LOW);
 
-  LoRaSerial.begin(115200, SERIAL_8N1, LORA_RXD, LORA_TXD);
-
-  lorawan.event_listener = &event_handler;
-  lorawan.setPinReset(LORA_RESET);
-  lorawan.reset();
-  delay(2000);
-
-  lorawan.set_DevAddr(LORA_DEV_ADDR);
-  lorawan.set_P2P_DevAddr(LORA_GATEWAY_ADDR);
-  lorawan.set_AppSKey(LORA_APP_SKEY);
-  lorawan.set_NwkSKey(LORA_NWK_SKEY);
-  lorawan.set_P2P_SyncWord(LORA_SYNC_WORD);
-  lorawan.set_JoinMode(SMW_SX1276M0_JOIN_MODE_P2P);
-  lorawan.join();
-  Serial.println("[LoRa] aguardando P2P join...");
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("[WiFi] conectando");
+  for (int t = 0; WiFi.status() != WL_CONNECTED && t < 20; t++) {
+    delay(500); Serial.print(".");
+  }
+  Serial.println();
+  if (WiFi.status() == WL_CONNECTED)
+    Serial.println("[WiFi] conectado: " + WiFi.localIP().toString());
+  else
+    Serial.println("[WiFi] falha na conexao");
 }
 
 void loop() {
-  lorawan.listen();
-
-  if (!loraReady) return;
+  if (WiFi.status() != WL_CONNECTED) {
+    static unsigned long lastWifi = 0;
+    if (millis() - lastWifi > 5000) {
+      lastWifi = millis();
+      WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    }
+    return;
+  }
 
   static unsigned long lastSend = 0;
-  unsigned long now = millis();
-  if (now - lastSend < SEND_INTERVAL_MS + random(0, 2000)) return;
-  lastSend = now;
+  if (millis() - lastSend < SEND_INTERVAL_MS + (unsigned long)random(0, 2000)) return;
+  lastSend = millis();
 
   float dist = medirDistancia();
   if (dist < 0) {
     Serial.println("[sensor] sem objeto detectado");
-  } else {
-    char msg[16];
-    snprintf(msg, sizeof(msg), "%d:%.1f", NODE_ID, dist);
-    // converte para hex (sendX = modo do exemplo RoboCore)
-    char hexMsg[sizeof(msg) * 2 + 1] = {0};
-    for (int j = 0; j < (int)strlen(msg); j++)
-      sprintf(hexMsg + j * 2, "%02X", (uint8_t)msg[j]);
-    Serial.printf("[LoRa] enviando: %s\n", msg);
-    resp = lorawan.sendX(1, hexMsg);
-    if (resp != CommandResponse::OK) {
-      Serial.println("[LoRa] erro no envio");
-    } else {
-      digitalWrite(PIN_LED, HIGH); delay(80); digitalWrite(PIN_LED, LOW);
-    }
+    return;
   }
+  Serial.printf("[sensor] distancia: %.1f cm\n", dist);
+
+  char url[64];
+  snprintf(url, sizeof(url), "http://" GATEWAY_IP ":%d/data", GATEWAY_PORT);
+
+  StaticJsonDocument<64> doc;
+  doc["node_id"]  = NODE_ID;
+  doc["distance"] = dist;
+  char body[64];
+  serializeJson(doc, body, sizeof(body));
+
+  HTTPClient http;
+  http.begin(url);
+  http.setTimeout(4000);
+  http.addHeader("Content-Type", "application/json");
+  int code = http.POST(body);
+
+  if (code > 0) {
+    Serial.printf("[HTTP] node=%d dist=%.1f status=%d\n", NODE_ID, dist, code);
+    digitalWrite(PIN_LED, HIGH); delay(80); digitalWrite(PIN_LED, LOW);
+  } else {
+    Serial.printf("[HTTP] erro gateway: %d\n", code);
+  }
+  http.end();
 }

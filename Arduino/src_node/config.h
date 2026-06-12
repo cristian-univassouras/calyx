@@ -1,28 +1,17 @@
 #pragma once
 
+// ─── WIFI ─────────────────────────────────────────────────────
+#define WIFI_SSID       "flamengo"
+#define WIFI_PASSWORD   "12344321"
+
+// IP do gateway: veja o Serial do gateway ao iniciar e coloque aqui
+#define GATEWAY_IP      "192.168.1.6"
+#define GATEWAY_PORT    80
+
 // ─── PINOS ────────────────────────────────────────────────────
 #define PIN_TRIG   27
 #define PIN_ECHO   32
-#define PIN_LED    2   // LED onboard do ESP32 DevKit
-
-// ─── LORA UART ────────────────────────────────────────────────
-#define LORA_RXD   16
-#define LORA_TXD   17
-#define LORA_RESET 5
-
-// ─── ENDEREÇOS P2P ────────────────────────────────────────────
-// Todos os dispositivos da rede compartilham AppSKey e NwkSKey.
-// Cada nó tem um DevAddr único; o gateway tem "00000000".
-#if NODE_ID == 1
-  #define LORA_DEV_ADDR   "00000001"
-#elif NODE_ID == 2
-  #define LORA_DEV_ADDR   "00000002"
-#endif
-
-#define LORA_GATEWAY_ADDR "00000000"   // destino P2P (gateway)
-#define LORA_APP_SKEY     "2B7E151628AED2A6ABF7158809CF4F3C"
-#define LORA_NWK_SKEY     "2B7E151628AED2A6ABF7158809CF4F3C"
-#define LORA_SYNC_WORD    0x34          // word privada (não LoRaWAN público)
+#define PIN_LED    2
 
 // ─── INTERVALO ────────────────────────────────────────────────
 #define SEND_INTERVAL_MS  5000UL
